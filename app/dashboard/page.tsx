@@ -26,7 +26,7 @@ type Appointment = {
 }
 
 export default function UserDashboard() {
-  const { user, isLoading: authLoading, refreshSession } = useAuth()
+  const { user, isLoading: authLoading, refreshSession, userRole } = useAuth()
   const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
@@ -34,6 +34,22 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (authLoading) return
+
+    // Redirect non-patient users
+    if (user && (userRole === "admin" || userRole === "doctor")) {
+      toast({
+        title: "Access denied",
+        description: "This dashboard is only for patients. Redirecting to appropriate dashboard.",
+        variant: "destructive",
+      })
+
+      if (userRole === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/doctor")
+      }
+      return
+    }
 
     if (!user) {
       router.push("/login")
@@ -159,7 +175,7 @@ export default function UserDashboard() {
     }
 
     fetchAppointments()
-  }, [user, authLoading, router, supabase, refreshSession])
+  }, [user, authLoading, router, supabase, refreshSession, userRole])
 
   if (authLoading || (isLoading && user)) {
     return (

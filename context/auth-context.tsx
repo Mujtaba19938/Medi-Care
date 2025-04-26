@@ -19,6 +19,7 @@ type AuthContextType = {
   signOut: () => Promise<void>
   resendVerificationEmail: (email: string) => Promise<{ error: any }>
   refreshSession: () => Promise<boolean>
+  redirectToRoleDashboard: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -60,6 +61,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Unexpected error refreshing session:", error)
       return false
+    }
+  }
+
+  // Function to redirect users based on their role
+  const redirectToRoleDashboard = () => {
+    if (!user) return
+
+    if (userRole === "admin" || user.email?.includes("admin")) {
+      router.push("/admin")
+    } else if (userRole === "doctor" || user.email?.includes("doctor")) {
+      router.push("/doctor")
+    } else {
+      router.push("/dashboard")
     }
   }
 
@@ -226,6 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resendVerificationEmail,
     refreshSession,
+    redirectToRoleDashboard,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

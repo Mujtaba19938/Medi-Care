@@ -1,40 +1,21 @@
-"use client"
-
 import type React from "react"
-import { useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { useAuth } from "@/context/auth-context"
-import { Loader2 } from "lucide-react"
-import AdminHeader from "@/components/admin-header"
+import type { Metadata } from "next"
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, userRole } = useAuth()
-  const router = useRouter()
-  const pathname = usePathname()
+export const metadata: Metadata = {
+  title: "MediCare Admin - Dashboard",
+  description: "Admin dashboard for MediCare healthcare management.",
+}
 
-  useEffect(() => {
-    if (!isLoading && (!user || userRole !== "admin") && pathname !== "/admin/login") {
-      router.push("/login?type=admin")
-    }
-  }, [user, isLoading, router, pathname, userRole])
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    )
-  }
-
-  if (!user && pathname !== "/admin/login") {
-    return null
-  }
-
-  // Only render the AdminHeader, not the regular Header
+export default function AdminLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  // We'll render the AdminHeader for all admin pages except login and signup
   return (
-    <div className="flex min-h-screen flex-col">
-      <AdminHeader />
-      <main className="flex-1">{children}</main>
+    <div className="flex flex-col min-h-screen">
+      {/* AdminHeader will be rendered in individual pages that need it */}
+      {children}
     </div>
   )
 }

@@ -13,12 +13,13 @@ import { HeartPulse } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/context/auth-context"
 
-export default function AdminLoginPage() {
+export default function AdminSignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
-  const { signIn } = useAuth()
+  const { signUp } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -26,30 +27,35 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      console.log("Admin login attempt with email:", email)
-      const { error } = await signIn(email, password)
+      // Validate that the email contains "admin"
+      if (!email.includes("admin")) {
+        throw new Error("Admin email must contain 'admin' (e.g., admin@example.com)")
+      }
+
+      // Validate password match
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match")
+      }
+
+      console.log("Admin signup attempt with email:", email)
+      const { error } = await signUp(email, password, "admin")
 
       if (error) {
-        console.error("Admin login error details:", error)
+        console.error("Admin signup error details:", error)
         throw error
       }
 
-      // Check if the email contains "admin" to verify it's an admin account
-      if (!email.includes("admin")) {
-        throw new Error("This login is only for administrators. Please use the regular login page.")
-      }
-
       toast({
-        title: "Login successful",
-        description: "You have been logged in as an administrator.",
+        title: "Registration successful",
+        description: "Please check your email to verify your account.",
       })
 
-      router.push("/admin")
+      router.push("/admin/login")
     } catch (error: any) {
-      console.error("Login error:", error)
+      console.error("Signup error:", error)
       toast({
-        title: "Login failed",
-        description: error.message || "There was a problem logging in. Please check your credentials.",
+        title: "Registration failed",
+        description: error.message || "There was a problem creating your account.",
         variant: "destructive",
       })
     } finally {
@@ -65,8 +71,8 @@ export default function AdminLoginPage() {
             <HeartPulse className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">MediCare</span>
           </Link>
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the admin dashboard</CardDescription>
+          <CardTitle className="text-2xl font-bold">Admin Registration</CardTitle>
+          <CardDescription>Create a new administrator account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -80,6 +86,7 @@ export default function AdminLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+              <p className="text-xs text-gray-500">Email must contain "admin" (e.g., admin@example.com)</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -91,12 +98,22 @@ export default function AdminLoginPage() {
                 required
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Creating account..." : "Create Admin Account"}
             </Button>
             <div className="text-center text-sm">
-              <Link href="/admin/signup" className="text-blue-600 hover:underline">
-                Don't have an admin account? Sign up
+              <Link href="/admin/login" className="text-blue-600 hover:underline">
+                Already have an admin account? Log in
               </Link>
             </div>
           </form>
