@@ -27,11 +27,6 @@ export default function AdminSignupPage() {
     setIsLoading(true)
 
     try {
-      // Validate that the email contains "admin"
-      if (!email.includes("admin")) {
-        throw new Error("Admin email must contain 'admin' (e.g., admin@example.com)")
-      }
-
       // Validate password match
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match")
@@ -86,7 +81,6 @@ export default function AdminSignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <p className="text-xs text-gray-500">Email must contain "admin" (e.g., admin@example.com)</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
